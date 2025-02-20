@@ -1,14 +1,11 @@
-using Hycite.Data;
-using Microsoft.EntityFrameworkCore;
+using Hycite.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<HyciteDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.UseServicesMiddleware(builder.Configuration);
 
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+app.UseAppMiddleware();
 
 app.Run();
