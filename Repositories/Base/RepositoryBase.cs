@@ -4,7 +4,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-public abstract class RepositoryBase<T> : IRepository<T> where T : class
+public interface IRepositoryBase<T> where T : class
+{
+    Task AddAsync(T entity);
+    Task DeleteAsync(T entity);
+    Task<IEnumerable<T>> GetAllAsync();
+    Task<T> GetByIdAsync(int id);
+    Task UpdateAsync(T entity);
+}
+
+public abstract class RepositoryBase<T> : IRepository<T>, IRepositoryBase<T> where T : class
 {
     protected readonly DbContext _context;
     protected readonly DbSet<T> _dbSet;
@@ -28,16 +37,19 @@ public abstract class RepositoryBase<T> : IRepository<T> where T : class
     public virtual async Task AddAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
+        _context.SaveChanges();
     }
 
     public virtual async Task UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
+        _context.SaveChanges();
     }
 
     public virtual async Task DeleteAsync(T entity)
     {
         _dbSet.Remove(entity);
+        _context.SaveChanges();
     }
 }
 

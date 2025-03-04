@@ -3,6 +3,7 @@ namespace Hycite.Models;
 public class UserActivity
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
     public required DateTime ActivityDate { get; set; }
     public required ProspectSource Source { get; set; }
     public bool Appointment { get; set; } = false;
