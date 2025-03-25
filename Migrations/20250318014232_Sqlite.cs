@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Hycite.Migrations
+namespace hycite.Migrations
 {
     /// <inheritdoc />
-    public partial class sqlite : Migration
+    public partial class Sqlite : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -107,6 +107,28 @@ namespace Hycite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserActivities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ActivityDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ProspectSourceId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Appointment = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Demonstration = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Sale = table.Column<decimal>(type: "TEXT", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreatedBy = table.Column<int>(type: "INTEGER", nullable: false),
+                    ModifiedBy = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserActivities", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserSecurities",
                 columns: table => new
                 {
@@ -114,14 +136,15 @@ namespace Hycite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Salt = table.Column<int>(type: "INTEGER", nullable: false),
+                    Salt = table.Column<string>(type: "TEXT", nullable: false),
                     WebEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
                     AppEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedBy = table.Column<int>(type: "INTEGER", nullable: false),
-                    ModifiedBy = table.Column<int>(type: "INTEGER", nullable: true)
+                    ModifiedBy = table.Column<int>(type: "INTEGER", nullable: true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -155,7 +178,6 @@ namespace Hycite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     FirstName = table.Column<string>(type: "TEXT", nullable: true),
                     LastName = table.Column<string>(type: "TEXT", nullable: true),
-                    SecurityId = table.Column<int>(type: "INTEGER", nullable: true),
                     DateOfBirth = table.Column<DateOnly>(type: "TEXT", nullable: true),
                     Gender = table.Column<int>(type: "INTEGER", nullable: true),
                     Phone = table.Column<string>(type: "TEXT", nullable: true),
@@ -191,60 +213,12 @@ namespace Hycite.Migrations
                         principalTable: "Goals",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Users_UserSecurities_SecurityId",
-                        column: x => x.SecurityId,
-                        principalTable: "UserSecurities",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Users_UserTypes_UserTypeId",
                         column: x => x.UserTypeId,
                         principalTable: "UserTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "UserActivities",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ActivityDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SourceId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Appointment = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Demonstration = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Sale = table.Column<decimal>(type: "TEXT", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    CreatedBy = table.Column<int>(type: "INTEGER", nullable: false),
-                    ModifiedBy = table.Column<int>(type: "INTEGER", nullable: true),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserActivities", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserActivities_ProspectSources_SourceId",
-                        column: x => x.SourceId,
-                        principalTable: "ProspectSources",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserActivities_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserActivities_SourceId",
-                table: "UserActivities",
-                column: "SourceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserActivities_UserId",
-                table: "UserActivities",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_AccessLevelId",
@@ -262,11 +236,6 @@ namespace Hycite.Migrations
                 column: "GoalId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_SecurityId",
-                table: "Users",
-                column: "SecurityId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_UserTypeId",
                 table: "Users",
                 column: "UserTypeId");
@@ -279,13 +248,16 @@ namespace Hycite.Migrations
                 name: "Hierarchies");
 
             migrationBuilder.DropTable(
-                name: "UserActivities");
-
-            migrationBuilder.DropTable(
                 name: "ProspectSources");
 
             migrationBuilder.DropTable(
+                name: "UserActivities");
+
+            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "UserSecurities");
 
             migrationBuilder.DropTable(
                 name: "AccessLevels");
@@ -295,9 +267,6 @@ namespace Hycite.Migrations
 
             migrationBuilder.DropTable(
                 name: "Goals");
-
-            migrationBuilder.DropTable(
-                name: "UserSecurities");
 
             migrationBuilder.DropTable(
                 name: "UserTypes");

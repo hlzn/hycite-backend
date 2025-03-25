@@ -14,7 +14,7 @@ public class User
     public required DateOnly OnboardingDate { get; set; }
     public DateOnly? OffboardingDate { get; set; }
     public AccessLevel? AccessLevel { get; set; }
-    public UserType UserType { get; set; }
+    public int UserTypeId { get; set; }
     public Company? Company { get; set; }
     public DateTime CreatedDate { get; set; }
     public DateTime ModifiedDate { get; set; }

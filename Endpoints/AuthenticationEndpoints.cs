@@ -11,15 +11,16 @@ namespace Hycite.Endpoints;
 
 public class Authenticate : Endpoint<ApiModel.Request, ApiModel.Response>
 {
-    private UserSecurityRepository _userSecurityRepository;
-    private UserRepository _userRepository;
+    private IUserSecurityRepository _userSecurityRepository;
+    private IUserRepository _userRepository;
     private char[] _jwtSecret;
 
-    public Authenticate(UserSecurityRepository userSecurityRepository, UserRepository userRepository, char[] jwtSecret)
+    public Authenticate(IUserSecurityRepository userSecurityRepository, IUserRepository userRepository, IConfiguration configuration)
     {
         _userSecurityRepository = userSecurityRepository;
         _userRepository = userRepository;
-        _jwtSecret = jwtSecret;
+        var secret = configuration["Jwt:Key"]?.ToCharArray() ?? throw new ArgumentNullException("Jwt:Key");
+        _jwtSecret = secret;        
     }
 
     public override void Configure()

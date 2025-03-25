@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-public interface IRepositoryBase<T> where T : class
+public interface IRepositoryBase<T> where T : class // T is the entity, DTO is the data transfer object
 {
     Task AddAsync(T entity);
     Task DeleteAsync(T entity);
@@ -12,6 +12,7 @@ public interface IRepositoryBase<T> where T : class
     Task<T> GetByIdAsync(int id);
     Task UpdateAsync(T entity);
 }
+
 
 public abstract class RepositoryBase<T> : IRepository<T>, IRepositoryBase<T> where T : class
 {
@@ -26,7 +27,7 @@ public abstract class RepositoryBase<T> : IRepository<T>, IRepositoryBase<T> whe
 
     public virtual async Task<T> GetByIdAsync(int id)
     {
-        return await _dbSet.FindAsync(id);
+        return await _dbSet.FindAsync(id) ?? throw new KeyNotFoundException();
     }
 
     public virtual async Task<IEnumerable<T>> GetAllAsync()
@@ -43,14 +44,15 @@ public abstract class RepositoryBase<T> : IRepository<T>, IRepositoryBase<T> whe
     public virtual async Task UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
     public virtual async Task DeleteAsync(T entity)
     {
         _dbSet.Remove(entity);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
+
 }
 
 public interface IRepository<T> where T : class

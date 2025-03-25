@@ -17,11 +17,11 @@ public class UserEndpoints : Endpoint<UserAPIModel.Request, UserAPIModel.Respons
     private readonly IUserSecurityRepository _userSecurityRepository;
     private readonly char[] _jwtSecret;
 
-    public UserEndpoints(IUserRepository userRepository, IUserSecurityRepository userSecurityRepository, char[] jwtSecret)
+    public UserEndpoints(IUserRepository userRepository, IUserSecurityRepository userSecurityRepository, IConfiguration configuration)
     {
         _userRepository = userRepository;
         _userSecurityRepository = userSecurityRepository;
-        _jwtSecret = jwtSecret;
+        _jwtSecret = configuration["Jwt:Key"]?.ToCharArray() ?? throw new ArgumentNullException("Jwt:Key");
     }
 
     public override void Configure()
@@ -35,8 +35,9 @@ public class UserEndpoints : Endpoint<UserAPIModel.Request, UserAPIModel.Respons
     {
         var user = new User
         {
-            FirstName = request.Data.FirstName,
-            LastName = request.Data.LastName,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Phone = request.Phone,
             DateHired = DateTime.UtcNow.ToDateOnly(), // Set appropriate value
             OnboardingDate = DateTime.UtcNow.ToDateOnly() // Set appropriate value
         };
@@ -55,13 +56,11 @@ public class UserEndpoints : Endpoint<UserAPIModel.Request, UserAPIModel.Respons
         Response = new UserAPIModel.Response
         {
             Success = true,
-            Data = new User
+            Data = new DTOs.UserCreatedDTO
             {
-                Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                DateHired = user.DateHired,
-                OnboardingDate = user.OnboardingDate
+                Email = userSecurity.Email
             }
         };
         await SendAsync(Response);

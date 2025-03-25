@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Hycite.Migrations
+namespace hycite.Migrations
 {
     [DbContext(typeof(HyciteDbContext))]
-    [Migration("20250220041347_sqlite")]
-    partial class sqlite
+    [Migration("20250318014232_Sqlite")]
+    partial class Sqlite
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -240,9 +240,6 @@ namespace Hycite.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("SecurityId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("UserTypeId")
                         .HasColumnType("INTEGER");
 
@@ -253,8 +250,6 @@ namespace Hycite.Migrations
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("GoalId");
-
-                    b.HasIndex("SecurityId");
 
                     b.HasIndex("UserTypeId");
 
@@ -288,20 +283,16 @@ namespace Hycite.Migrations
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ProspectSourceId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Sale")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SourceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SourceId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserActivities");
                 });
@@ -338,7 +329,11 @@ namespace Hycite.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Salt")
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("WebEnabled")
@@ -396,10 +391,6 @@ namespace Hycite.Migrations
                         .WithMany()
                         .HasForeignKey("GoalId");
 
-                    b.HasOne("Hycite.Models.UserSecurity", "Security")
-                        .WithMany()
-                        .HasForeignKey("SecurityId");
-
                     b.HasOne("Hycite.Models.UserType", "UserType")
                         .WithMany()
                         .HasForeignKey("UserTypeId")
@@ -412,29 +403,7 @@ namespace Hycite.Migrations
 
                     b.Navigation("Goal");
 
-                    b.Navigation("Security");
-
                     b.Navigation("UserType");
-                });
-
-            modelBuilder.Entity("Hycite.Models.UserActivity", b =>
-                {
-                    b.HasOne("Hycite.Models.ProspectSource", "Source")
-                        .WithMany()
-                        .HasForeignKey("SourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Hycite.Models.User", null)
-                        .WithMany("UserActivities")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Source");
-                });
-
-            modelBuilder.Entity("Hycite.Models.User", b =>
-                {
-                    b.Navigation("UserActivities");
                 });
 #pragma warning restore 612, 618
         }

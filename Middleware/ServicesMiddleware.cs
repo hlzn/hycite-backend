@@ -5,37 +5,50 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Hycite.Repositories;
 
 namespace Hycite.Middleware;
 
 public static class ServicesMiddleware
 {
+    private static void AddAppServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUserSecurityRepository, UserSecurityRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserActivityRepository, UserActivityRepository>();
+    }
+
     public static void UseServicesMiddleware(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddAppServices();
         services.AddDbContext<HyciteDbContext>(options =>
             options.UseSqlite(configuration.GetConnectionString("SqlLiteConnection")));
 
-        // Check if we are running development environment
-        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-        {
-            services.AddSwaggerGen(c =>
+        services.AddAuthentication(options =>
             {
-                c.SwaggerDoc("v1", new() { Title = "Hycite", Version = "v1" });
-            });
-        }
-
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                    ValidIssuer = configuration["Jwt:Issuer"] ?? throw new ArgumentNullException("Jwt:Issuer"),
+                    ValidAudience = configuration["Jwt:Audience"] ?? throw new ArgumentNullException("Jwt:Audience"),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key")))
                 };
             });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("User", policy => policy.RequireRole("User"));
+            options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+        });
 
         services.AddFastEndpoints();
     }

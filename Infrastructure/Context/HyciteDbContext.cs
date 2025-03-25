@@ -2,6 +2,36 @@ namespace Hycite.Data;
 
 using Hycite.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+
+public class HyciteDbContextFactory : IDesignTimeDbContextFactory<HyciteDbContext>
+{
+    private IConfiguration? _configuration;
+
+    private IConfiguration GetAppConfiguration()
+    {
+        var environmentName = Environment.GetEnvironmentVariable(
+                      "ASPNETCORE_ENVIRONMENT");
+
+        var path = Directory.GetCurrentDirectory();
+        var builder = new ConfigurationBuilder()
+                .SetBasePath(path)
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{environmentName}.json", true)
+                .AddEnvironmentVariables();
+
+        return builder.Build();
+    }
+
+    public HyciteDbContext CreateDbContext(string[] args)
+    {
+        _configuration = GetAppConfiguration();
+        var optionsBuilder = new DbContextOptionsBuilder<HyciteDbContext>();
+        optionsBuilder.UseSqlite(_configuration.GetConnectionString("SqlLiteConnection"));
+
+        return new HyciteDbContext(optionsBuilder.Options);
+    }
+}
 
 public class HyciteDbContext : DbContext
 {
